@@ -27,7 +27,7 @@ ambari_repo_cmd="wget -O /etc/yum.repos.d/ambari.repo http://s3.amazonaws.com/de
 $SSH $h $ambari_repo_cmd || fail "Failed to fetch Ambari repo file"
 
 echo "Installing packages"
-$SSH $h "yum install -y pssh vim git tmux ambari-server gcc-c++" || fail "Failed to install packages"
+$SSH $h "yum install -y pssh vim git tmux ambari-server gcc-c++ sysstat" || fail "Failed to install packages"
 
 echo "Running Ambari Server setup"
 $SSH $h "ambari-server setup -s" || fail "Failed to setup ambari-server"
