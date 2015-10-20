@@ -18,26 +18,27 @@ LIGHT_GRAY="\033[0;37m"
 WHITE="\033[1;37m"
 NC="\033[0m"
 
-USAGE="Usage: provision.sh <hostname> <private_key>"
+USAGE="Usage: provision.sh <private_key> <hostname>"
 fail() {
-  echo "${RED}Error: ${NC}$1"
+  echo "\n${RED}Error: ${NC}$1"
   exit 1
 }
 
 status() {
-  echo "${GREEN}$1${NC}"
+  echo "${GREEN}$@${NC}"
 }
 
 if [[ $# -ne 2 ]]; then
-  echo "${YELLOW}$USAGE"
-  fail "Expected two arguments"
+  echo "\n${RED}Expected two arguments${NC}"
+  echo $USAGE
+  exit 1
 fi
+
+pk=$1
+shift
 
 # the host
 h=$1
-shift
-
-pk=$1
 shift
 
 SSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i $pk "
@@ -52,7 +53,14 @@ $SSH $h "yum install -y pssh vim git tmux ambari-server gcc-c++ sysstat" || fail
 
 status "Running Ambari Server setup"
 $SSH $h "ambari-server setup -s" || fail "Failed to setup ambari-server"
+
+status "Appending extra Ambari server configuration"
+$SSH $h "echo 'command.retry.enabled=true' >> /etc/ambari-server/conf/ambari.properties" || fail "Failed to add command retry to Ambari server configuration"
+$SSH $h "echo 'command.retry.count=8' >> /etc/ambari-server/conf/ambari.properties" || fail "Failed to add command retry to Ambari server configuration"
+
+status "Starting Ambari server"
 $SSH $h "ambari-server start" || fail "Failed to start ambari-server"
+
 
 $SCP "$pk" $h:~/.ssh/id_rsa || fail "Failed to copy private key"
 
@@ -67,3 +75,5 @@ fi
 
 status "Installing system test packages"
 $SSH $h "easy_install pytest" || fail "Failed to install pytest"
+
+status "Done!"

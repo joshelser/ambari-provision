@@ -1,0 +1,26 @@
+{
+    "blueprint": "hadoop",
+    "default_password": "password",
+    "configurations": [
+    ],
+    "host_groups": [
+        {
+            "name": "host_group_1",
+            "hosts": [
+              { "fqdn": "jelser-test-1.novalocal"}
+            ]
+        },
+        {
+            "name": "host_group_2",
+            "hosts": [
+              { "fqdn": "jelser-test-2.novalocal"}
+            ]
+        },
+        {
+            "name": "host_group_3",
+            "hosts": [
+              { "fqdn": "jelser-test-3.novalocal"}
+            ]
+        }
+    ]
+}
