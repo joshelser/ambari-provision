@@ -85,9 +85,9 @@ fi
 # TODO check response code in curl output
 
 status "Loading blueprint"
-curl --user admin:admin -H 'X-Requested-By: ambari' -X POST http://$first_node:8080/api/v1/blueprints/hadoop -d @${bin}/new-blueprint.json || fail "Failed to put blueprint."
+curl --user admin:admin -H 'X-Requested-By: ambari' -X POST http://$first_node:8080/api/v1/blueprints/hadoop -d @${bin}/3-node-hbase/blueprint.json || fail "Failed to put blueprint."
 
 status "Loading cluster"
-curl --user admin:admin -H 'X-Requested-By: ambari' -X POST http://$first_node:8080/api/v1/clusters/hadoop -d @${bin}/new-cluster.json || fail "Failed to put cluster."
+curl --user admin:admin -H 'X-Requested-By: ambari' -X POST http://$first_node:8080/api/v1/clusters/hadoop -d @${bin}/3-node-hbase/cluster.json || fail "Failed to put cluster."
 
 status "Done!"
