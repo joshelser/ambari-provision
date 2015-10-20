@@ -1,3 +1,10 @@
 Expectations:
 
-* Ambari server is installed on the first node
+* Ambari server is installed on the first node.
+* 3-Node HBase configuration provided.
+* Hostnames in the cluster.json file need to be updated.
+
+Usage:
+
+`./provision-gateway.sh ~/.ssh/my_key <ambari-server>`
+`./provision-nodes.sh ~/.ssh/my_key <ambari-server> <node> <node> ...`
