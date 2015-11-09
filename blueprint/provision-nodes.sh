@@ -57,7 +57,8 @@ for node in $@; do
     first_node=$node
   fi
   last_node=node
-  ambari_repo_cmd="wget -O /etc/yum.repos.d/ambari.repo http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/latest/2.1.0/ambaribn.repo"
+  #ambari_repo_cmd="wget -O /etc/yum.repos.d/ambari.repo http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/latest/2.1.0/ambaribn.repo"
+  ambari_repo_cmd="wget -O /etc/yum.repos.d/ambari.repo http://dev.hortonworks.com.s3.amazonaws.com/ambari/centos6/2.x/latest/2.1.3.0/ambaribn.repo"
   
   status "Provisioning $node"
   $SSH $node $ambari_repo_cmd || fail "Failed to fetch Ambari repo file"
@@ -65,10 +66,31 @@ for node in $@; do
   status "Installing packages"
   $SSH $node "yum install -y pssh vim git tmux gcc-c++ sysstat ambari-agent" || fail "Failed to install packages"
   
+  $SCP "$pk" $node:~/.ssh/id_rsa || fail "Failed to copy private key"
+
+  status "Creating test user"
+  retcode=$($SSH $node 'useradd -m hrt_qa; echo $?')
+  if [[ $retcode == "0" ]]; then
+    # Created the user
+    echo "Created user hrt_qa"
+  elif [[ $retcode == "9" ]]; then
+    # User already exists, continue on
+    echo "User hrt_qa already exists, continuing"
+  else
+    fail "Failed to create hrt_qa"
+  fi
+
+  $SSH $node gpasswd -a hrt_qa wheel || fail "Failed to add hrt_qa to wheel"
+  $SSH $node "echo '%wheel  ALL=(ALL)       NOPASSWD: ALL' > /etc/sudoers.d/hrt_qa" || fail "Failed to configure sudoers for hrt_qa"
+
+  $SSH $node mkdir -p /home/hrt_qa/.ssh || fail "Failed to create hrt_qa's SSH directory"
+  $SCP "$pk" $node:/home/hrt_qa/.ssh/id_rsa || fail "Failed to copy private key"
+  $SSH $node chown -R hrt_qa: /home/hrt_qa || fail "Failed to change ownership of hrt_qa's home directory"
+
   if [[ -f ~/.tmux.conf ]]; then 
     $SCP ~/.tmux.conf $node: || fail "Failed to copy .tmux.conf"
   fi
-  
+
   status "Configuring and starting ambari agent"
   $SSH $node sed "s/hostname=localhost/hostname=$first_node/" /etc/ambari-agent/conf/ambari-agent.ini -i
   $SSH $node ambari-agent start
