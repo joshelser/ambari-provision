@@ -8,3 +8,9 @@ Usage:
 
 `./provision-gateway.sh ~/.ssh/my_key <ambari-server>`
 `./provision-nodes.sh ~/.ssh/my_key <ambari-server> <node> <node> ...`
+
+TODO:
+
+* Create HDFS dir for test user
+* Make sure test user can password-less SSH (authorized_keys)
+* Disable requiretty for test user in /etc/sudoers
