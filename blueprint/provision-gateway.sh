@@ -77,4 +77,12 @@ fi
 status "Installing system test packages"
 $SSH $h "easy_install pytest" || fail "Failed to install pytest"
 
+status 'Configuring Git'
+gitconfig = <<EOF
+[credential]
+  helper = cache
+EOF
+$SSH $h "echo '$gitconfig' >> /root/.gitconfig" || fail 'Failed to configure Git'
+$SSH $h "echo '$gitconfig' >> /home/hrt_qa/.gitconfig" || fail 'Failed to configure Git'
+
 status "Done!"

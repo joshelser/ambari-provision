@@ -91,6 +91,14 @@ for node in $@; do
     $SCP ~/.tmux.conf $node: || fail "Failed to copy .tmux.conf"
   fi
 
+  status 'Configuring Git'
+  gitconfig = <<EOF
+  [credential]
+    helper = cache
+  EOF
+  $SSH $h "echo '$gitconfig' >> /root/.gitconfig" || fail 'Failed to configure Git'
+  $SSH $h "echo '$gitconfig' >> /home/hrt_qa/.gitconfig" || fail 'Failed to configure Git'
+
   status "Configuring and starting ambari agent"
   $SSH $node sed "s/hostname=localhost/hostname=$first_node/" /etc/ambari-agent/conf/ambari-agent.ini -i
   $SSH $node ambari-agent start
